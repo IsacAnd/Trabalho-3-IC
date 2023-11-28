@@ -1,5 +1,23 @@
-a = [10, 5, 4];
+clc
+clear
 
-x = sum(a);
+function element = mutation(binary)
+    randomNum = rand();
+    
+    if randomNum <= 0.9 then
+        random = ceil(randomNum * 40 + (randomNum == 0) * 1);
+        if binary(random) == '0' then
+            binary(random) = '1'
+        else
+            binary(random) = '0';
+        end
+    end
+    
+    element = strcat(binary);
+endfunction
 
-disp(x);
+binary = strsplit(element);
+result = mutation(binary);
+
+disp(element);
+disp(result);
