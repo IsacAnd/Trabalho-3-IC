@@ -1,62 +1,23 @@
 // Trabalho de Algoritmos Genéticos
 
-// arrumar mutação
-// arrumar avaliação de forma que os menores valores ganhem destaque - OK
-// arrumar a criação da população - OK
-clear
 clc
-
+clear
 
 function pop = startPop(n)
-    pop = string(zeros(1,40));
+    pop = string(zeros(1,n));
     for i = 1:n
-        randomNumbers = rand(1, n);
+        randomNumbers = rand(1, 40);
         binaryVector = round(randomNumbers);
 
         pop(i) = strcat(string(binaryVector));
     end
 endfunction
 
-function fathers = avaliatePop(p) // função que avalia a população
-    fathers = zeros(1, 40);
-    for i = 1:40
-        bin = p(i);
-        [x, y] = binaryToDecimal(bin);
-        element = ackleyFunction(x, y);
-        fathers(i) = element;
-    end
-endfunction
-
-function [x, y] = binaryToDecimal(binary) // transforma elementos binários da população em decimais
-    v = strsplit(binary, 20);
-    x = -10 + bin2dec(v(1))*(10 - (-10))/((2)^20 - 1);
-    y = -10 + bin2dec(v(2))*(10 - (-10))/((2)^20 - 1);
-endfunction
-
-function selectedFather = fatherSelection(fathers) // seleção de pais
-    soma = 0;
-    
-    for i = 1:40
-        soma = 1/fathers(i) + soma;
-    end
-    
-    limite = rand(1) * soma;
-
-    i = 1;
-    aux = 0;
-    while (i <= 40 && aux < limite)
-        aux = aux + 1/fathers(i);
-        i = i + 1;
-    end
-
-    selectedFather = i - 1;
-endfunction
-
-function element = mutation(binary)
+function element = mutation(binary, n)
     randomNum = rand();
     
     if randomNum <= 0.005 then
-        random = ceil(randomNum * 40 + (randomNum == 0) * 1);
+        random = ceil(randomNum * n + (randomNum == 0) * 1);
         if binary(random) == '0' then
             binary(random) = '1'
         else
@@ -67,14 +28,14 @@ function element = mutation(binary)
     element = strcat(binary);
 endfunction
 
-function sons = recombinationAndMutation(newPop) // recombinação e mutação da população
+function sons = recombinationAndMutation(newPop, n) // recombinação e mutação da população
     
-    sons = string(zeros(1, 40));
-    for (i = 1:40)
+    sons = string(zeros(1, n));
+    for (i = 1:n)
         
         // recombinação
         father1 = newPop(i);
-        father2 = newPop(modulo(i, 40) + 1);
+        father2 = newPop(modulo(i, n) + 1);
         
         randomNum = rand();
         x = ceil(((randomNum==0) * 1) + randomNum * 39);
@@ -84,78 +45,102 @@ function sons = recombinationAndMutation(newPop) // recombinação e mutação d
         
         // mutação 
         binary = strsplit(element);
-        element = mutation(binary);
+        element = mutation(binary, n);
         
         sons(i) = element;
     end
 endfunction
 
-function p = elitism(v1, popAvaliation) // elitismo
-    p = string(zeros(1, 10));
-    for i = 1:10
-        [value, ind] = min(popAvaliation);
-        p(i) = v1(ind);
-        popAvaliation(ind) = 10000;
+function selectedFather = fatherSelection(fathers, n) // seleção de pais
+    soma = 0;
+    
+    for i = 1:n
+        soma = 1/fathers(i) + soma;
     end
+    
+    limite = rand(1) * soma;
+
+    i = 1;
+    aux = 0;
+    while (i <= n && aux < limite)
+        aux = aux + 1/fathers(i);
+        i = i + 1;
+    end
+
+    selectedFather = i - 1;
+endfunction
+
+function [x, y] = binaryToDecimal(binary) // transforma elementos binários da população em decimais
+    v = strsplit(binary, 20);
+    x = -10 + bin2dec(v(1))*(10 - (-10))/((2)^20 - 1);
+    y = -10 + bin2dec(v(2))*(10 - (-10))/((2)^20 - 1);
 endfunction
 
 function result = ackleyFunction(x, y) // função de Ackley
-    auy = 2 * 3.14 * y;
-    aux = 2 * 3.14 * x;
-    result = -20 * exp(-0.2 * sqrt(0.5*(x^2 + y^2))) + exp(0.5*(cos(aux) + cos(auy))) + exp(1) + 20;
+    result = -20 * exp(-0.2 * sqrt(0.5*(x^2 + y^2))) - exp(0.5*(cos(2 * 3.14 * y)+ cos(2 * 3.14 * x))) + exp(1) + 20;
 endfunction
 
-/* Main */
+function fathers = avaliatePop(p, n) // função que avalia a população
+    fathers = zeros(1, n);
+    for i = 1:n
+        bin = p(i);
+        [x, y] = binaryToDecimal(bin);
+        element = ackleyFunction(x, y);
+        fathers(i) = element;
+    end
+endfunction
+
+function percentage = perRoulette(vec, ind)
+    soma = 0;
+    
+    for i = 1:3
+        soma = 1/vec(i) + soma; // [0.1 0.2 0.3]
+    end
+    
+    percentage = 100 * ((1/ind) / soma);
+endfunction
+
+////// main
 
 t = 0;
-p = startPop(40); // inicia população
+n = 100;
+pop = startPop(n); // população original
 
-while (t < 10)
-//  ============== PAIS ================
-    popAvaliation = avaliatePop(p); // cria um vetor de avaliação da população que corresponde a avaliação de cada elemento
+while t < 30
+    avaliation = avaliatePop(pop, n); // avaliação da população original
     
-    selectedFathers = zeros(1, 40); // cria um vetor que possui as posições dos elementos escolhidos para serem pais 
-    for (i = 1:40)
-        selectedFathers(i) = fatherSelection(popAvaliation);
-    end
+    selectedFathers = zeros(1, n); // cria um vetor que possui as posições dos elementos escolhidos para serem pais 
     
-    aux = string(zeros(1, 40)); // cruza a informação que o elemento carrega com a sua seleção
-    for i = 1:40
-        aux(i) = p(selectedFathers(i));
-    end
-    
-    sons = recombinationAndMutation(aux);
-
-// ============== FILHOS ================
-    sonsAvaliation = avaliatePop(sons);
-    
-    selectedSons = zeros(1, 40); // cria um vetor que possui as posições dos elementos escolhidos para serem pais 
-    for (i = 1:40)
-        selectedSons(i) = fatherSelection(sonsAvaliation);
+    for (i = 1:n)
+        selectedFathers(i) = fatherSelection(avaliation, n);
     end
 
-    aux2 = string(zeros(1, 40)); // cruza a informação que o elemento carrega com a sua seleção
-    for i = 1:40
-        aux2(i) = sons(selectedSons(i));
+    aux = string(zeros(1, n)); // cruza a informação que o elemento carrega com a sua seleção
+    for i = 1:n
+        aux(i) = pop(selectedFathers(i));
     end
+
+    aux = recombinationAndMutation(aux, n);
+
+    auxAvaliation = avaliatePop(aux);
+
+    disp("melhor indivíduo e sua porcentagem na roleta: ", min(auxAvaliation), perRoulette(auxAvaliation, min(auxAvaliation)));
+    disp("pior indivíduo e sua porcentagem na roleta: ", max(auxAvaliation), perRoulette(auxAvaliation, max(auxAvaliation)));
+    disp("média: ", sum(auxAvaliation)/n);
     
-    // fazer elitismo e colocar esses valores no vetor com a população
-    
-// ============== ELITISMO ==============
-    besties = elitism(p, popAvaliation);
-    
-    for i = 41:50
-        aux2(i) = besties(51 - i)
-    end
-    
-    avg = sum(avaliatePop(p))/50;
-    worstElement = max(avaliatePop(p));
-    bestElement = min(avaliatePop(p));
-    disp("Média de avaliação: ", avg);
-    
-    p = aux2;
+    pop = aux;
     t = t + 1;
+    
 end
+
+plot(auxAvaliation);
+
+
+
+
+
+
+
 
 
 
