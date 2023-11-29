@@ -1,31 +1,39 @@
 clc
-clear
+clear 
 
-function element = mutation(binary)
-    randomNum = rand();
-    
-    if randomNum <= 0.9 then
-        random = ceil(randomNum * 40 + (randomNum == 0) * 1);
-        
-        disp(binary(random));
-        
-        if binary(random) == '0' then
-            binary(random) = '1'
-        else
-            binary(random) = '0';
-        end
-        
-        disp(binary(random));
-    end
-    
-    element = strcat(binary);
+function result = ackleyFunction(x, y) // função de Ackley
+    PI = 3.14;
+    result = -20 * exp(-0.2 * sqrt(0.5*(x^2 + y^2))) + exp(0.5(cos(2*3.14) + cos(2*3.14))) + exp(1) + 20;
 endfunction
 
-element = '0000000000000000000011111111111111111111';
+function [x, y] = binaryToDecimal(binary) // transforma elementos binários da população em decimais
+    v = strsplit(binary, 20);
+    x = -10 + bin2dec(v(1))*(10 - (-10))/((2)^20 - 1);
+    y = -10 + bin2dec(v(2))*(10 - (-10))/((2)^20 - 1);
+endfunction
 
-binary = strsplit(element);
+function fathers = avaliatePop(p) // função que avalia a população
+    fathers = zeros(1, 40);
+    for i = 1:40
+        bin = p(i);
+        [x, y] = binaryToDecimal(bin);
+        element = ackleyFunction(x, y);
+        fathers(i) = element;
+    end
+endfunction
 
-result = mutation(binary);
+function pop = startPop(n)
+    pop = string(zeros(1,40));
+    for i = 1:n
+        randomNumbers = rand(1, n);
+        binaryVector = round(randomNumbers);
 
-disp(element);
+        pop(i) = strcat(string(binaryVector));
+    end
+endfunction
+
+pop = startPop(40);
+
+result = avaliatePop(pop);
+
 disp(result);
