@@ -1,0 +1,8 @@
+function result = ackleyFunction(x, y)
+    result = -20 * exp(-0.2 * sqrt(0.5 * (x ^ 2 + y ^ 2))) - exp(0.5 * (cos(2 * 3.14 * y) + cos(2 * 3.14 * x))) + exp(1) + 20;
+endfunction
+
+x = 0;
+y = 0;
+
+disp(ackleyFunction(x, y));
