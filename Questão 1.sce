@@ -81,9 +81,9 @@ function fathers = avaliatePop(p, n)
     end
 endfunction
 
-function percentage = perRoulette(vec, ind)
+function percentage = perRoulette(vec, ind, n)
     soma = 0;
-    for i = 1:3
+    for i = 1:n
         soma = 1 / vec(i) + soma;
     end
     percentage = 100 * ((1 / ind) / soma);
@@ -103,8 +103,9 @@ endfunction
 
 elite = 10; // quantidade de elementos que serão salvos a cada geração
 n = 100 + elite; // população + quantidade de elementos que serão salvos a cada geração
-pop = startPop(n);
-iterations = 40;
+
+pop = startPop(n); // iniciar população
+iterations = 50; // difinição de gerações 
 
 minValues = zeros(1, iterations);
 maxValues = zeros(1, iterations);
@@ -118,35 +119,36 @@ for t = 1:iterations
         selectedFathers(i) = fatherSelection(avaliation, n);
     end
 
-    newPop = string(zeros(1, n)); // cria um vetor com os elementos escolhidos
+    newPop = string(zeros(1, n+elite)); // cria um vetor com os elementos escolhidos
     for i = 1:n
         newPop(i) = pop(selectedFathers(i));
     end
 
     newPop = recombinationAndMutation(newPop, n); // recombinação e mutação desses elementos escolhidos
+    
+    [survivors, value] = elitism(pop, avaliation, elite); // elitismo
+    j = 1; 
+    for i = n:elite
+        newPop(i) = survivors(j)
+        j = j + 1;
+    end
 
     newPopAvaliation = avaliatePop(newPop); // avalia novamente a população 
 
-    minValues(t) = min(newPopAvaliation);
+    minValues(t) = min(newPopAvaliation); // plotagem de resultados
     maxValues(t) = max(newPopAvaliation);
-    avgValues(t) = sum(newPopAvaliation) / n;
+    avgValues(t) = sum(newPopAvaliation) / (n);
     
-    disp("Iteration: ", t);
-    disp("  Best individual and its percentage in the roulette: ", minValues(t), perRoulette(newPopAvaliation, minValues(t)));
-    disp("  Worst individual and its percentage in the roulette: ", maxValues(t), perRoulette(newPopAvaliation, maxValues(t)));
-    disp("  Average: ", avgValues(t));
-    
-    [survivors, value] = elitism(pop, avaliation, elite); // elitismo
+    disp("==========================================================");
+    disp("Geração: ", t);
+    disp("Melhor indíviduo e sua porcentagem na roleta: ", minValues(t), perRoulette(newPopAvaliation, minValues(t), n));
+    disp("Pior indivíduo e sua porcentagem na roleta: ", maxValues(t), perRoulette(newPopAvaliation, maxValues(t), n));
+    disp("Média: ", avgValues(t));
 
-    pop = newPop;
-    j = 1;
-    for i = n:elite
-        pop(i) = survivors(j)
-        j = j + 1;
-    end
+    pop = newPop; // atribui a nova população ao vetor de população
 end
 
-// Plotting the convergence graph
+// plot do gráfico de convergência dos melhores/piores indivíduos e a média geral da população
 clf();
 plot(1:iterations, minValues, '-b', 'LineWidth', 2, 'Marker', 'o', 'MarkerEdgeColor', 'b', 'MarkerFaceColor', 'w');
 plot(1:iterations, maxValues, '-r', 'LineWidth', 2, 'Marker', 's', 'MarkerEdgeColor', 'r', 'MarkerFaceColor', 'w');
