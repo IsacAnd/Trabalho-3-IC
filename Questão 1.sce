@@ -1,3 +1,8 @@
+/*Trabalho 3 IC
+Aluno: Isac Andrade Alves - 493787
+Aluno: João Paulo de Abreu Militão - 
+*/
+
 clc
 clear
 
