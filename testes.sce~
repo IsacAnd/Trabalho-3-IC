@@ -6,7 +6,7 @@ Aluno: João Paulo de Abreu Militão -
 clc
 clear
 
-function pop = startPop(n)
+function pop = startPop(n) // função que iniciar a população
     pop = string(zeros(1, n));
     for i = 1:n
         randomNumbers = rand(1, 40);
@@ -15,7 +15,7 @@ function pop = startPop(n)
     end
 endfunction
 
-function element = mutation(binary, n)
+function element = mutation(binary, n) // função de mutação
     randomNum = rand();
     if randomNum <= 0.05 then
         random = ceil(randomNum * n + (randomNum == 0) * 1);
@@ -28,7 +28,7 @@ function element = mutation(binary, n)
     element = strcat(binary);
 endfunction
 
-function sons = recombinationAndMutation(newPop, n)
+function sons = recombinationAndMutation(newPop, n) // função de recombinação e mutação
     sons = string(zeros(1, n));
     for (i = 1:n)
         // recombination
@@ -71,8 +71,10 @@ function [x, y] = binaryToDecimal(binary)
 endfunction
 
 function result = ackleyFunction(x, y)
-    result = -20 * exp(-0.2 * sqrt(0.5 * (x ^ 2 + y ^ 2))) - exp(0.5 * (cos(2 * 3.14 * y) + cos(2 * 3.14 * x))) + exp(1) + 20;
+    result = -20 * exp(-0.2 * sqrt(0.5 * (x ^ 2 + y ^ 2))) - exp(0.5 * (cos(2 * 3.14159 * y) + cos(2 * 3.14159 * x))) + exp(1) + 20;
 endfunction
+
+disp(ackleyFunction(-0.0002575, -0.0002003));
 
 function fathers = avaliatePop(p, n)
     fathers = zeros(1, n);
@@ -135,12 +137,6 @@ for t = 1:iterations
     minValues(t) = min(newPopAvaliation); // plotagem de resultados
     maxValues(t) = max(newPopAvaliation);
     avgValues(t) = sum(newPopAvaliation) / (n);
-    
-    disp("==========================================================");
-    disp("Geração: ", t);
-    disp("Melhor indíviduo e sua porcentagem na roleta: ", minValues(t), perRoulette(newPopAvaliation, minValues(t), n));
-    disp("Pior indivíduo e sua porcentagem na roleta: ", maxValues(t), perRoulette(newPopAvaliation, maxValues(t), n));
-    disp("Média: ", avgValues(t));
 
     pop = newPop; // atribui a nova população ao vetor de população
     j = 1; 
@@ -150,12 +146,3 @@ for t = 1:iterations
     end
 end
 
-// plot do gráfico de convergência dos melhores/piores indivíduos e a média geral da população
-clf();
-plot(1:iterations, minValues, '-b', 'LineWidth', 2, 'Marker', 'o', 'MarkerEdgeColor', 'b', 'MarkerFaceColor', 'w');
-plot(1:iterations, maxValues, '-r', 'LineWidth', 2, 'Marker', 's', 'MarkerEdgeColor', 'r', 'MarkerFaceColor', 'w');
-plot(1:iterations, avgValues, '-g', 'LineWidth', 2, 'Marker', 'd', 'MarkerEdgeColor', 'g', 'MarkerFaceColor', 'w');
-xlabel('Iterations');
-ylabel('Function Value');
-legend('Min', 'Max', 'Avg');
-title('Convergence Plot');

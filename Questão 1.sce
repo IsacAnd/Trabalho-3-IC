@@ -6,7 +6,7 @@ Aluno: João Paulo de Abreu Militão -
 clc
 clear
 
-function pop = startPop(n)
+function pop = startPop(n) // função que iniciar a população
     pop = string(zeros(1, n));
     for i = 1:n
         randomNumbers = rand(1, 40);
@@ -15,7 +15,7 @@ function pop = startPop(n)
     end
 endfunction
 
-function element = mutation(binary, n)
+function element = mutation(binary, n) // função de mutação
     randomNum = rand();
     if randomNum <= 0.05 then
         random = ceil(randomNum * n + (randomNum == 0) * 1);
@@ -28,7 +28,7 @@ function element = mutation(binary, n)
     element = strcat(binary);
 endfunction
 
-function sons = recombinationAndMutation(newPop, n)
+function sons = recombinationAndMutation(newPop, n) // função de recombinação e mutação
     sons = string(zeros(1, n));
     for (i = 1:n)
         // recombination
@@ -71,7 +71,7 @@ function [x, y] = binaryToDecimal(binary)
 endfunction
 
 function result = ackleyFunction(x, y)
-    result = -20 * exp(-0.2 * sqrt(0.5 * (x ^ 2 + y ^ 2))) - exp(0.5 * (cos(2 * 3.14 * y) + cos(2 * 3.14 * x))) + exp(1) + 20;
+    result = -20 * exp(-0.2 * sqrt(0.5 * (x ^ 2 + y ^ 2))) - exp(0.5 * (cos(2 * 3.14159 * y) + cos(2 * 3.14159 * x))) + exp(1) + 20;
 endfunction
 
 function fathers = avaliatePop(p, n)
@@ -99,6 +99,14 @@ function [survivors, value] = elitism(pop, avaliation, n)
         survivors(i) = pop(ind);
         avaliation(ind) = 100;
     end
+endfunction
+
+function showXYValues(pop)
+    avaliation = avaliatePop(pop);
+    [value, ind] = min(avaliation);
+    [x, y] = binaryToDecimal(pop(ind));
+    disp("==========================================================");
+    disp("Valores de x e y para o menor valor encontrado: ", x, y);
 endfunction
 
 /* MAIN */
@@ -138,8 +146,8 @@ for t = 1:iterations
     
     disp("==========================================================");
     disp("Geração: ", t);
-    disp("Melhor indíviduo e sua porcentagem na roleta: ", minValues(t), perRoulette(newPopAvaliation, minValues(t), n));
-    disp("Pior indivíduo e sua porcentagem na roleta: ", maxValues(t), perRoulette(newPopAvaliation, maxValues(t), n));
+    disp("Nota do melhor indíviduo e sua porcentagem na roleta: ", minValues(t), perRoulette(newPopAvaliation, minValues(t), n));
+    disp("Nota do pior indivíduo e sua porcentagem na roleta: ", maxValues(t), perRoulette(newPopAvaliation, maxValues(t), n));
     disp("Média: ", avgValues(t));
 
     pop = newPop; // atribui a nova população ao vetor de população
@@ -149,6 +157,8 @@ for t = 1:iterations
         j = j + 1;
     end
 end
+
+showXYValues(pop);
 
 // plot do gráfico de convergência dos melhores/piores indivíduos e a média geral da população
 clf();
