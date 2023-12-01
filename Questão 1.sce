@@ -1,12 +1,12 @@
 /*Trabalho 3 IC
 Aluno: Isac Andrade Alves - 493787
-Aluno: João Paulo de Abreu Militão - 
+Aluno: João Paulo de Abreu Militão - 494959
 */
 
 clc
 clear
 
-function pop = startPop(n) // função que iniciar a população
+function pop = startPop(n) // função que inicia a população
     pop = string(zeros(1, n));
     for i = 1:n
         randomNumbers = rand(1, 40);
@@ -104,9 +104,42 @@ endfunction
 function showXYValues(pop)
     avaliation = avaliatePop(pop);
     [value, ind] = min(avaliation);
-    [x, y] = binaryToDecimal(pop(ind));
+    [xMin, yMin] = binaryToDecimal(pop(ind));
+    
     disp("==========================================================");
-    disp("Valores de x e y para o menor valor encontrado: ", x, y);
+    disp("Valores de x e y para o menor valor encontrado: ", xMin, yMin);
+    
+    // Plot do gráfico de convergência dos melhores/piores indivíduos e a média geral da população
+    figure();
+    plot(1:iterations, minValues, '-b', 'LineWidth', 2, 'Marker', 'o', 'MarkerEdgeColor', 'b', 'MarkerFaceColor', 'w');
+    plot(1:iterations, maxValues, '-r', 'LineWidth', 2, 'Marker', 's', 'MarkerEdgeColor', 'r', 'MarkerFaceColor', 'w');
+    plot(1:iterations, avgValues, '-g', 'LineWidth', 2, 'Marker', 'd', 'MarkerEdgeColor', 'g', 'MarkerFaceColor', 'w');
+    xlabel('Iterations');
+    ylabel('Function Value');
+    legend('Min', 'Max', 'Avg');
+    title('Convergence Plot');
+    
+    //Plot com função Ackley e uma esfera em um plano de corte para marcar a posição minima encontrada
+    figure();
+    x = -10:0.1:10;
+    y = x;
+    [x1, y1] = meshgrid(x, y);
+    
+    z1 = -20 * exp(-0.2 * sqrt(0.5 * (x1.^2 + y1.^2))) - exp(0.5 * (cos(2*%pi*x1) + cos(2*%pi*y1))) + exp(1) + 20;
+
+    Xesfera = xMin;  
+    Yesfera = yMin;  
+    Zesfera = ackleyFunction(xMin, yMin);  
+
+    raio = 0.5;  
+    z2=Zesfera + sqrt(raio^2 - (x1 - Xesfera).^2 - (y1 - Yesfera).^2);
+    clf; 
+    surf(x1, y1, z1, 'facecolor', 'b');  
+    surf(x1, y1, z2, 'facecolor', 'r'); 
+    xlabel('X');
+    ylabel('Y');
+    zlabel('Ackley Function / Marcação');
+    title('Ackley function with minimum point marking');
 endfunction
 
 /* MAIN */
@@ -120,6 +153,8 @@ iterations = 40; // difinição de gerações
 minValues = zeros(1, iterations);
 maxValues = zeros(1, iterations);
 avgValues = zeros(1, iterations);
+
+
 
 for t = 1:iterations
     avaliation = avaliatePop(pop, n); // avalia população
@@ -142,7 +177,7 @@ for t = 1:iterations
 
     minValues(t) = min(newPopAvaliation); // plotagem de resultados
     maxValues(t) = max(newPopAvaliation);
-    avgValues(t) = sum(newPopAvaliation) / (n);
+    avgValues(t) = sum(newPopAvaliation) / (n + elite);
     
     disp("==========================================================");
     disp("Geração: ", t);
@@ -160,12 +195,4 @@ end
 
 showXYValues(pop);
 
-// plot do gráfico de convergência dos melhores/piores indivíduos e a média geral da população
-clf();
-plot(1:iterations, minValues, '-b', 'LineWidth', 2, 'Marker', 'o', 'MarkerEdgeColor', 'b', 'MarkerFaceColor', 'w');
-plot(1:iterations, maxValues, '-r', 'LineWidth', 2, 'Marker', 's', 'MarkerEdgeColor', 'r', 'MarkerFaceColor', 'w');
-plot(1:iterations, avgValues, '-g', 'LineWidth', 2, 'Marker', 'd', 'MarkerEdgeColor', 'g', 'MarkerFaceColor', 'w');
-xlabel('Iterations');
-ylabel('Function Value');
-legend('Min', 'Max', 'Avg');
-title('Convergence Plot');
+
