@@ -12,8 +12,7 @@ endfunction
 
 function element = mutation(binary, n)
     randomNum = rand();
-    
-    if randomNum <= 0.005 then
+    if randomNum <= 0.05 then
         random = ceil(randomNum * n + (randomNum == 0) * 1);
         if binary(random) == '0' then
             binary(random) = '1';
@@ -21,7 +20,6 @@ function element = mutation(binary, n)
             binary(random) = '0';
         end
     end
-    
     element = strcat(binary);
 endfunction
 
@@ -90,7 +88,6 @@ function percentage = perRoulette(vec, ind, n)
 endfunction
 
 function [survivors, value] = elitism(pop, avaliation, n)
-    
     survivors = string(zeros(1,n));
     for i = 1:n
         [value, ind] = min(avaliation)
@@ -105,7 +102,7 @@ elite = 10; // quantidade de elementos que serão salvos a cada geração
 n = 100 + elite; // população + quantidade de elementos que serão salvos a cada geração
 
 pop = startPop(n); // iniciar população
-iterations = 50; // difinição de gerações 
+iterations = 40; // difinição de gerações 
 
 minValues = zeros(1, iterations);
 maxValues = zeros(1, iterations);
@@ -119,19 +116,14 @@ for t = 1:iterations
         selectedFathers(i) = fatherSelection(avaliation, n);
     end
 
-    newPop = string(zeros(1, n+elite)); // cria um vetor com os elementos escolhidos
+    newPop = string(zeros(1, n)); // cria um vetor com os elementos escolhidos
     for i = 1:n
         newPop(i) = pop(selectedFathers(i));
     end
+    
+    [survivors, value] = elitism(newPop, avaliation, elite); // elitismo
 
     newPop = recombinationAndMutation(newPop, n); // recombinação e mutação desses elementos escolhidos
-    
-    [survivors, value] = elitism(pop, avaliation, elite); // elitismo
-    j = 1; 
-    for i = n:elite
-        newPop(i) = survivors(j)
-        j = j + 1;
-    end
 
     newPopAvaliation = avaliatePop(newPop); // avalia novamente a população 
 
@@ -146,6 +138,11 @@ for t = 1:iterations
     disp("Média: ", avgValues(t));
 
     pop = newPop; // atribui a nova população ao vetor de população
+    j = 1; 
+    for i = n:elite
+        pop(i) = survivors(j) // atribui os indivíduos salvos pelo elitismo
+        j = j + 1;
+    end
 end
 
 // plot do gráfico de convergência dos melhores/piores indivíduos e a média geral da população
